@@ -155,6 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\device.cpp" />
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="index.cpp" />
     <ClCompile Include="src\instance.cpp" />
@@ -162,6 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\config.h" />
+    <ClInclude Include="include\device.h" />
     <ClInclude Include="include\engine.h" />
     <ClInclude Include="include\instance.h" />
     <ClInclude Include="include\Logging.h" />

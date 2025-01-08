@@ -17,14 +17,13 @@ private:
 	int height{ 480 };
 	GLFWwindow* window{ nullptr };
 
-	//vulkan instance
+	//vulkan instance related varaiables
 	vk::Instance instance{ nullptr };
-
-	//debug callback
+	vk::DispatchLoaderDynamic dldi; // dynamic instance dispatcher
 	vk::DebugUtilsMessengerEXT debugMessenger{ nullptr };
 
-	// dynamic instance dispatcher
-	vk::DispatchLoaderDynamic dldi;
+	//device related variables
+	vk::PhysicalDevice physicalDevice{ nullptr };
 
 	void build_glfw_window();
 
@@ -32,4 +31,7 @@ private:
 	void make_instance();
 
 	void make_debug_messenger();
+
+	// physical device setup
+	void make_devie();
 };
