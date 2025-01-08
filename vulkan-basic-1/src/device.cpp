@@ -151,3 +151,132 @@ vk::PhysicalDevice vkInit::choose_physical_device(vk::Instance &instance, bool d
 
 	return nullptr;
 }
+
+// logical device code starts from here
+
+vkInit::QueueFamilyIndices vkInit::findQueueFamilies(const vk::PhysicalDevice &PhysicalDevice, bool debug)
+{
+	vkInit::QueueFamilyIndices indices;
+	std::vector<vk::QueueFamilyProperties> queueFamilies = PhysicalDevice.getQueueFamilyProperties();
+
+	if (debug) {
+		std::cout << "There are " << queueFamilies.size() << " queue families available on the system.\n";
+	}
+
+	int i = 0;
+	for (const vk::QueueFamilyProperties &queueFamily : queueFamilies) {
+
+		/*
+		* // Provided by VK_VERSION_1_0
+			typedef struct VkQueueFamilyProperties {
+			VkQueueFlags    queueFlags;
+			uint32_t        queueCount;
+			uint32_t        timestampValidBits;
+			VkExtent3D      minImageTransferGranularity;
+			} VkQueueFamilyProperties;
+
+			queueFlags is a bitmask of VkQueueFlagBits indicating capabilities of the queues in this queue family.
+
+			queueCount is the unsigned integer count of queues in this queue family. Each queue family must support
+			at least one queue.
+
+			timestampValidBits is the unsigned integer count of meaningful bits in the timestamps written via
+			vkCmdWriteTimestamp. The valid range for the count is 36..64 bits, or a value of 0,
+			indicating no support for timestamps. Bits outside the valid range are guaranteed to be zeros.
+
+			minImageTransferGranularity is the minimum granularity supported for image transfer
+			operations on the queues in this queue family.
+		*/
+
+		/*
+		* // Provided by VK_VERSION_1_0
+			typedef enum VkQueueFlagBits {
+			VK_QUEUE_GRAPHICS_BIT = 0x00000001,
+			VK_QUEUE_COMPUTE_BIT = 0x00000002,
+			VK_QUEUE_TRANSFER_BIT = 0x00000004,
+			VK_QUEUE_SPARSE_BINDING_BIT = 0x00000008,
+			} VkQueueFlagBits;
+		*/
+		/*std::cout << "Queue Family " << i << ":\n";
+		std::cout << "  Queue Count: " << queueFamily.queueCount << "\n";
+		std::cout << "  Timestamp Valid Bits: " << queueFamily.timestampValidBits << "\n";
+		std::cout << "  Min Image Transfer Granularity: "
+			<< queueFamily.minImageTransferGranularity.width << "x"
+			<< queueFamily.minImageTransferGranularity.height << "x"
+			<< queueFamily.minImageTransferGranularity.depth << "\n";
+
+		if (queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
+			std::cout << "    VK_QUEUE_GRAPHICS_BIT is set\n";
+		}
+		if (queueFamily.queueFlags & vk::QueueFlagBits::eCompute) {
+			std::cout << "    VK_QUEUE_COMPUTE_BIT is set\n";
+		}
+		if (queueFamily.queueFlags & vk::QueueFlagBits::eTransfer) {
+			std::cout << "    VK_QUEUE_TRANSFER_BIT is set\n";
+		}
+		if (queueFamily.queueFlags & vk::QueueFlagBits::eSparseBinding) {
+			std::cout << "    VK_QUEUE_SPARSE_BINDING_BIT is set\n";
+		}*/
+
+		if (queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
+			indices.graphicsFamily = i;
+			indices.presentFamily = i;
+
+			if (debug) {
+				std::cout << "Queue Family " << i << " is suitable for graphics and presenting";
+			}
+		}
+
+		if (indices.isComplete()) {
+			break;
+		}
+
+		i++;
+	}
+	return indices;
+}
+
+vk::Device vkInit::create_logical_device(const vk::PhysicalDevice& physicalDevice, bool debug) {
+
+	vkInit::QueueFamilyIndices indices = findQueueFamilies(physicalDevice, debug);
+	float queuePriority = 1.0f;
+	vk::DeviceQueueCreateInfo queueCreateInfo = vk::DeviceQueueCreateInfo(
+		vk::DeviceQueueCreateFlags(), indices.graphicsFamily.value(),
+		1, &queuePriority
+	);
+	
+	vk::PhysicalDeviceFeatures physicalDeviceFeatures = vk::PhysicalDeviceFeatures();
+	std::vector<const char*> enabledLayers;
+	if (debug) {
+		enabledLayers.push_back("VK_LAYER_KHRONOS_validation");
+	}
+	vk::DeviceCreateInfo logicalDeviceInfo = vk::DeviceCreateInfo(
+		vk::DeviceCreateFlags(),
+		1, &queueCreateInfo,
+		(uint32_t)enabledLayers.size(),
+		enabledLayers.data(),
+		0, nullptr,
+		&physicalDeviceFeatures
+	);
+
+	try
+	{
+		vk::Device logicalDevice = physicalDevice.createDevice(logicalDeviceInfo);
+		if (debug) std::cout << "GPU has been succssfully abstracted! \n";	
+		return logicalDevice;
+	}
+	catch (vk::SystemError err)
+	{
+		if (debug) std::cout << "Device Creation failed \n";
+		return nullptr;
+	}
+	return nullptr;
+
+}
+
+vk::Queue vkInit::get_queue(const vk::PhysicalDevice& physicalDevice, const vk::Device& logicalDevice, bool debug)
+{
+	QueueFamilyIndices indices = findQueueFamilies(physicalDevice, debug);
+
+	return logicalDevice.getQueue(indices.graphicsFamily.value(), 0);
+}

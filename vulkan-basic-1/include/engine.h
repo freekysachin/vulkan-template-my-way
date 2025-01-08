@@ -24,6 +24,8 @@ private:
 
 	//device related variables
 	vk::PhysicalDevice physicalDevice{ nullptr };
+	vk::Device logicalDevice{ nullptr };
+	vk::Queue graphicsQueue{ nullptr };
 
 	void build_glfw_window();
 

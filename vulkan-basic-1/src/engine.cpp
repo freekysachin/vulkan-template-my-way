@@ -79,11 +79,15 @@ void Engine::make_debug_messenger()
 void Engine::make_devie()
 {
 	physicalDevice = vkInit::choose_physical_device(instance, debugMode);
+ 	logicalDevice =	 vkInit::create_logical_device(physicalDevice, debugMode);
+	graphicsQueue = vkInit::get_queue(physicalDevice, logicalDevice, debugMode);
 }
 
 Engine::~Engine() {
 
 	if (debugMode) std::cout << "Engine Distroyed! \n";
+
+	logicalDevice.destroy();
 
 	/*
 	* from vulkan_funcs.hpp:
