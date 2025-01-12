@@ -8,7 +8,9 @@ Engine::Engine() {
 	build_glfw_window();
 	make_instance();
 	make_debug_messenger();
+	create_surface();
 	make_devie();
+	swapchainCreation();
 }
 
 void Engine::build_glfw_window() {
@@ -79,15 +81,44 @@ void Engine::make_debug_messenger()
 void Engine::make_devie()
 {
 	physicalDevice = vkInit::choose_physical_device(instance, debugMode);
- 	logicalDevice =	 vkInit::create_logical_device(physicalDevice, debugMode);
-	graphicsQueue = vkInit::get_queue(physicalDevice, logicalDevice, debugMode);
+ 	logicalDevice =	 vkInit::create_logical_device(physicalDevice, surface,debugMode);
+	std::vector<vk::Queue> queues = vkInit::get_queue(physicalDevice, logicalDevice, surface,debugMode);
+	graphicsQueue = queues[0];
+	presentQueue = queues[1];
+}
+
+void Engine::swapchainCreation()
+{
+	// query and log the swapchain support 
+	//vkInit::query_swapchain_support(physicalDevice, surface, debugMode);
+	vkInit::SwapchainBundle bundle = vkInit::create_swapchain(logicalDevice, physicalDevice, surface, width, height, debugMode);
+	swapchain = bundle.swapchain;
+	swapchainImages = bundle.images;
+	swapchainFormat = bundle.format;
+	swapchainExtent = bundle.extent;
+
+
+
+}
+
+void Engine::create_surface()
+{
+	VkSurfaceKHR c_style_surface;
+	if (glfwCreateWindowSurface(instance, window, nullptr, &c_style_surface) != VK_SUCCESS) {
+		if (debugMode) std::cout << "failed to abstract the glfw surface for vulkan \n";
+
+	}
+	else if (debugMode) std::cout << "Successfully abstracted glfw surface \n";
+	surface = c_style_surface;
 }
 
 Engine::~Engine() {
 
 	if (debugMode) std::cout << "Engine Distroyed! \n";
 
+	logicalDevice.destroySwapchainKHR(swapchain);
 	logicalDevice.destroy();
+	instance.destroySurfaceKHR(surface);
 
 	/*
 	* from vulkan_funcs.hpp:
