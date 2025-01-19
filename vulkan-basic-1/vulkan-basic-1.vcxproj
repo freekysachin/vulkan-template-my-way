@@ -159,18 +159,36 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\pipeline.cpp" />
+    <ClCompile Include="src\shaders.cpp" />
     <ClCompile Include="src\device.cpp" />
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="index.cpp" />
     <ClCompile Include="src\instance.cpp" />
     <ClCompile Include="src\Logging.cpp" />
+    <ClCompile Include="src\queue_families.cpp" />
+    <ClCompile Include="src\swapchain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\config.h" />
     <ClInclude Include="include\device.h" />
     <ClInclude Include="include\engine.h" />
+    <ClInclude Include="include\frame.h" />
     <ClInclude Include="include\instance.h" />
     <ClInclude Include="include\Logging.h" />
+    <ClInclude Include="include\pipeline.h" />
+    <ClInclude Include="include\queue_families.h" />
+    <ClInclude Include="include\shaders.h" />
+    <ClInclude Include="include\swapchain.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="shaders\shader.frag" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\fragment.spv" />
+    <None Include="shaders\shader_compiler.bat" />
+    <None Include="shaders\test.bat" />
+    <None Include="shaders\vertex.spv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

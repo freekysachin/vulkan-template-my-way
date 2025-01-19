@@ -30,6 +30,18 @@
     <ClCompile Include="src\device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\swapchain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\queue_families.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shaders.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pipeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\engine.h">
@@ -47,5 +59,33 @@
     <ClInclude Include="include\device.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\swapchain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\queue_families.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\frame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\shaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\pipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="shaders\shader.frag" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\shader_compiler.bat">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shaders\test.bat">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shaders\fragment.spv" />
+    <None Include="shaders\vertex.spv" />
   </ItemGroup>
 </Project>

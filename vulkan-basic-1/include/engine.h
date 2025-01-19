@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <instance.h>
 #include<Logging.h>
+#include<frame.h>
 
 class Engine {
 public:
@@ -30,9 +31,14 @@ private:
 	vk::Queue graphicsQueue{ nullptr };
 	vk::Queue presentQueue{ nullptr };
 	vk::SwapchainKHR swapchain{ nullptr };
-	std::vector<vk::Image> swapchainImages;
+	std::vector<vkUtil::SwapchainFrame> swapchainFrames;
 	vk::Format swapchainFormat;
 	vk::Extent2D swapchainExtent;
+
+	// pipeline related variable
+	vk::PipelineLayout layout;
+	vk::RenderPass renderpass;
+	vk::Pipeline pipeline;
 
 	void build_glfw_window();
 
@@ -46,4 +52,7 @@ private:
 	
 	//Swapchain
 	void swapchainCreation();
+
+	// pipeline setup
+	void make_pipeline();
 };

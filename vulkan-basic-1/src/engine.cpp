@@ -1,6 +1,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include<engine.h>
 #include <device.h>
+#include<swapchain.h>
+#include<pipeline.h>
 
 Engine::Engine() {
 	if (debugMode) std::cout << "Making a graphics Engine \n";
@@ -11,6 +13,7 @@ Engine::Engine() {
 	create_surface();
 	make_devie();
 	swapchainCreation();
+	make_pipeline();
 }
 
 void Engine::build_glfw_window() {
@@ -78,6 +81,17 @@ void Engine::make_debug_messenger()
 	debugMessenger = vkInit::make_debug_messenger(instance, dldi);
 }
 
+void Engine::create_surface()
+{
+	VkSurfaceKHR c_style_surface;
+	if (glfwCreateWindowSurface(instance, window, nullptr, &c_style_surface) != VK_SUCCESS) {
+		if (debugMode) std::cout << "failed to abstract the glfw surface for vulkan \n";
+
+	}
+	else if (debugMode) std::cout << "Successfully abstracted glfw surface \n";
+	surface = c_style_surface;
+}
+
 void Engine::make_devie()
 {
 	physicalDevice = vkInit::choose_physical_device(instance, debugMode);
@@ -93,29 +107,40 @@ void Engine::swapchainCreation()
 	//vkInit::query_swapchain_support(physicalDevice, surface, debugMode);
 	vkInit::SwapchainBundle bundle = vkInit::create_swapchain(logicalDevice, physicalDevice, surface, width, height, debugMode);
 	swapchain = bundle.swapchain;
-	swapchainImages = bundle.images;
+	swapchainFrames = bundle.frames;
 	swapchainFormat = bundle.format;
 	swapchainExtent = bundle.extent;
 
-
-
 }
 
-void Engine::create_surface()
+void Engine::make_pipeline()
 {
-	VkSurfaceKHR c_style_surface;
-	if (glfwCreateWindowSurface(instance, window, nullptr, &c_style_surface) != VK_SUCCESS) {
-		if (debugMode) std::cout << "failed to abstract the glfw surface for vulkan \n";
+	vkInit::GraphicsPipelineInBundle specification = {};
+	specification.device = logicalDevice;
+	specification.vertexFilePath = "shaders/vertex.spv";
+	specification.fragFilePath = "shaders/fragment.spv";
+	specification.swapchainExtent = swapchainExtent;
+	specification.swapchainFormat = swapchainFormat;
 
-	}
-	else if (debugMode) std::cout << "Successfully abstracted glfw surface \n";
-	surface = c_style_surface;
+	vkInit::GraphicsPiplineOutBundle output = vkInit::make_graphics_pipeline(specification, debugMode);
+	layout = output.layout;
+	renderpass = output.renderpass;
+	pipeline = output.pipeline;
 }
+
 
 Engine::~Engine() {
 
 	if (debugMode) std::cout << "Engine Distroyed! \n";
 
+
+	logicalDevice.destroyPipeline(pipeline);
+	logicalDevice.destroyPipelineLayout(layout);
+	logicalDevice.destroyRenderPass(renderpass);
+
+	for (vkUtil::SwapchainFrame frame : swapchainFrames) {
+		logicalDevice.destroyImageView(frame.imageView);
+	}
 	logicalDevice.destroySwapchainKHR(swapchain);
 	logicalDevice.destroy();
 	instance.destroySurfaceKHR(surface);
