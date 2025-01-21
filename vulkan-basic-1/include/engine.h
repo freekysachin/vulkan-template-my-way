@@ -35,10 +35,16 @@ private:
 	vk::Format swapchainFormat;
 	vk::Extent2D swapchainExtent;
 
-	// pipeline related variable
+	// pipeline related variables
 	vk::PipelineLayout layout;
 	vk::RenderPass renderpass;
 	vk::Pipeline pipeline;
+
+	// command related variables
+	vk::CommandPool commandPool;
+	vk::CommandBuffer mainCommandbuffer;
+
+
 
 	void build_glfw_window();
 
@@ -55,4 +61,7 @@ private:
 
 	// pipeline setup
 	void make_pipeline();
+
+	// The Last Step
+	void final_setup();
 };

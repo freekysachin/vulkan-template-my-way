@@ -3,6 +3,9 @@
 #include <device.h>
 #include<swapchain.h>
 #include<pipeline.h>
+#include<framebuffer.h>
+#include<commands.h>
+#include<sync.h>
 
 Engine::Engine() {
 	if (debugMode) std::cout << "Making a graphics Engine \n";
@@ -14,6 +17,7 @@ Engine::Engine() {
 	make_devie();
 	swapchainCreation();
 	make_pipeline();
+	final_setup();
 }
 
 void Engine::build_glfw_window() {
@@ -128,18 +132,34 @@ void Engine::make_pipeline()
 	pipeline = output.pipeline;
 }
 
+void Engine::final_setup() {
+
+	vkInit::framebufferInput framebufferInput;
+	framebufferInput.device = logicalDevice;
+	framebufferInput.renderpass = renderpass;
+	framebufferInput.swapchainExtent = swapchainExtent;
+
+	vkInit::make_framebuffers(framebufferInput, swapchainFrames, debugMode);
+
+	commandPool = vkInit::make_command_pool(logicalDevice, physicalDevice, surface, debugMode);
+	vkInit::commandbufferInputChunk commandbufferInput = {logicalDevice , commandPool , swapchainFrames};
+
+	mainCommandbuffer = vkInit::make_command_buffers(commandbufferInput, debugMode);
+
+}
 
 Engine::~Engine() {
 
 	if (debugMode) std::cout << "Engine Distroyed! \n";
 
-
+	logicalDevice.destroyCommandPool(commandPool);
 	logicalDevice.destroyPipeline(pipeline);
 	logicalDevice.destroyPipelineLayout(layout);
 	logicalDevice.destroyRenderPass(renderpass);
 
 	for (vkUtil::SwapchainFrame frame : swapchainFrames) {
 		logicalDevice.destroyImageView(frame.imageView);
+		logicalDevice.destroyFramebuffer(frame.framebuffer);
 	}
 	logicalDevice.destroySwapchainKHR(swapchain);
 	logicalDevice.destroy();
