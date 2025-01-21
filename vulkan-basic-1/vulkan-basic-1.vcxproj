@@ -170,6 +170,7 @@
     <ClCompile Include="src\Logging.cpp" />
     <ClCompile Include="src\queue_families.cpp" />
     <ClCompile Include="src\swapchain.cpp" />
+    <ClCompile Include="src\sync.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\app.h" />

@@ -146,18 +146,28 @@ void Engine::final_setup() {
 
 	mainCommandbuffer = vkInit::make_command_buffers(commandbufferInput, debugMode);
 
+	inFlightFence = vkInit::make_fence(logicalDevice, debugMode);
+	imageAvailable = vkInit::make_semaphroe(logicalDevice, debugMode);
+	renderFinished = vkInit::make_semaphroe(logicalDevice, debugMode);
+
 }
 
 Engine::~Engine() {
 
 	if (debugMode) std::cout << "Engine Distroyed! \n";
 
+
+	logicalDevice.destroyFence(inFlightFence);
+	logicalDevice.destroySemaphore(imageAvailable);
+	logicalDevice.destroySemaphore(renderFinished);
+
+
 	logicalDevice.destroyCommandPool(commandPool);
 	logicalDevice.destroyPipeline(pipeline);
 	logicalDevice.destroyPipelineLayout(layout);
 	logicalDevice.destroyRenderPass(renderpass);
 
-	for (vkUtil::SwapchainFrame frame : swapchainFrames) {
+	for (const vkUtil::SwapchainFrame &frame : swapchainFrames) {
 		logicalDevice.destroyImageView(frame.imageView);
 		logicalDevice.destroyFramebuffer(frame.framebuffer);
 	}
