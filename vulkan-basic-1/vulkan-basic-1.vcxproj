@@ -193,6 +193,7 @@
     <Text Include="shaders\shader.frag" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\.gitignore" />
     <None Include="shaders\fragment.spv" />
     <None Include="shaders\shader_compiler.bat" />
     <None Include="shaders\test.bat" />
