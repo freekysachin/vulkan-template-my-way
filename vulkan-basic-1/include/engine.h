@@ -7,17 +7,19 @@
 
 class Engine {
 public:
-	Engine();
-
+	Engine(int width, int height, GLFWwindow* window, bool debugMode);
 	~Engine();
+
+	void render();
+
 private:
 
-	bool debugMode = true;
+	bool debugMode;
 
 
-	int width{ 640 };
-	int height{ 480 };
-	GLFWwindow* window{ nullptr };
+	int width;
+	int height;
+	GLFWwindow* window;
 
 	//vulkan instance related varaiables
 	vk::Instance instance{ nullptr };
@@ -50,8 +52,6 @@ private:
 
 
 
-	void build_glfw_window();
-
 	// instance creation
 	void make_instance();
 	void make_debug_messenger();
@@ -68,4 +68,6 @@ private:
 
 	// The Last Step
 	void final_setup();
+
+	void record_draw_commands(vk::CommandBuffer commandbuffer, uint32_t imageIndex);
 };

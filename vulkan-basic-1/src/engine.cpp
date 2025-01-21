@@ -7,10 +7,15 @@
 #include<commands.h>
 #include<sync.h>
 
-Engine::Engine() {
+Engine::Engine(int width, int height, GLFWwindow* window, bool debugMode) {
+
+	this->debugMode = debugMode;
+	this->width = width;
+	this->height = height;
+	this->window = window;
+
 	if (debugMode) std::cout << "Making a graphics Engine \n";
 
-	build_glfw_window();
 	make_instance();
 	make_debug_messenger();
 	create_surface();
@@ -20,27 +25,6 @@ Engine::Engine() {
 	final_setup();
 }
 
-void Engine::build_glfw_window() {
-	
-	// initialize glfw
-	glfwInit();
-
-	// no default rendering client , we weill hook vulkan up to the window later
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); //sets the specific wndw hint to the desired value
-
-	//resizing breaks the swapchain, we'll disable it for now
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-	if (window = glfwCreateWindow(width, height, "glfwWindow", nullptr, nullptr)) {
-		if (debugMode) {
-			std::cout << "Successfully made a glfw window \n";
-		}
-	}
-	else {
-		if (debugMode) std::cout << "GLFW window creation failed \n";
-	}
-
-}
 
 
 void Engine::make_instance() {
@@ -152,8 +136,99 @@ void Engine::final_setup() {
 
 }
 
+void Engine::record_draw_commands(vk::CommandBuffer commandbuffer, uint32_t imageIndex)
+{
+	vk::CommandBufferBeginInfo beginInfo = {};
+	try {
+		commandbuffer.begin(beginInfo);
+	}
+	catch (vk::SystemError err) {
+		if (debugMode) std::cout << "Failed to begin recording command buffer \n";
+	}
+
+	vk::RenderPassBeginInfo renderPassInfo = {};
+	renderPassInfo.renderPass = renderpass;
+	renderPassInfo.framebuffer = swapchainFrames[imageIndex].framebuffer;
+	renderPassInfo.renderArea.offset.x = 0;
+	renderPassInfo.renderArea.offset.y = 0;
+	renderPassInfo.renderArea.extent = swapchainExtent;
+
+	vk::ClearValue clearColor = { std::array<float,4>{1.0f, 0.5f, 0.25f, 1.0f} };
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+
+	commandbuffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+
+	commandbuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
+
+	commandbuffer.draw(3, 1, 0, 0);
+
+	commandbuffer.endRenderPass();
+
+	try
+	{
+		commandbuffer.end();
+	}
+	catch (vk::SystemError err)
+	{
+		if (debugMode)std::cout << "Failed to finish recording command buffer\n";
+	}
+
+}
+
+void Engine::render()
+{
+ 	logicalDevice.waitForFences(1, &inFlightFence, VK_TRUE, UINT64_MAX);
+	logicalDevice.resetFences(1, &inFlightFence);
+
+	uint32_t imageIndex{ logicalDevice.acquireNextImageKHR(swapchain, UINT64_MAX, imageAvailable, nullptr).value };
+
+	vk::CommandBuffer commandbuffer = swapchainFrames[imageIndex].commandbuffer;
+
+	commandbuffer.reset();
+
+	record_draw_commands(commandbuffer, imageIndex);
+
+	vk::SubmitInfo submitInfo = {};
+
+	vk::Semaphore waitSemaphores[] = { imageAvailable };
+	vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = waitSemaphores;
+	submitInfo.pWaitDstStageMask = waitStages;
+
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &commandbuffer;
+
+	vk::Semaphore signalSemaphores[] = { renderFinished };
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = signalSemaphores;
+
+	try
+	{
+		graphicsQueue.submit(submitInfo, inFlightFence);
+	}
+	catch (vk::SystemError err)
+	{
+		if (debugMode) std::cout << "Failed to submit draw command buffer \n";
+	}
+
+	vk::PresentInfoKHR presentInfo = {};
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = signalSemaphores;
+
+	vk::SwapchainKHR swapchains[] = { swapchain };
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = swapchains;
+	presentInfo.pImageIndices = &imageIndex;
+
+	presentQueue.presentKHR(presentInfo);
+
+}
+
 Engine::~Engine() {
 
+	logicalDevice.waitIdle();
 	if (debugMode) std::cout << "Engine Distroyed! \n";
 
 
@@ -187,3 +262,5 @@ Engine::~Engine() {
 	//terminate glfw
 	glfwTerminate();
 }
+
+

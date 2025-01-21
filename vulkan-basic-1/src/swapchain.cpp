@@ -119,7 +119,7 @@ vk::PresentModeKHR vkInit::choose_swaphain_present_mode(std::vector<vk::PresentM
 			return presentMode;
 		}
 	}*/
-	return vk::PresentModeKHR::eFifo;
+	return vk::PresentModeKHR::eImmediate;
 }
 
 vk::Extent2D vkInit::choose_swapchain_extent(uint32_t width, uint32_t height, vk::SurfaceCapabilitiesKHR capabilites)

@@ -1,8 +1,9 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include<engine.h>
+#include<app.h>
 
 int main() {
-	Engine* graphicsEngine = new Engine();
-	delete graphicsEngine;
+	App* myApp = new App(640, 480, true);
+	myApp->run();
+	delete myApp;
 	return 0;
 }
